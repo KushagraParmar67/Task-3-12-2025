@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Management API - Coding Assignment</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 8px;
+        }
+
+        .header h2 {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .time-badge {
+            background: white;
+            color: #2563eb;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 12px;
+            font-size: 0.95em;
+        }
+
+        .content {
+            display: block;
+        }
+
+        .section {
+            padding: 30px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            color: #1f2937;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .requirements {
+            background: white;
+        }
+
+        .requirements-list {
+            list-style: none;
+        }
+
+        .requirements-list li {
+            padding: 10px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .requirements-list li::before {
+            content: '•';
+            color: #2563eb;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .endpoint {
+            background: #f9fafb;
+            color: #1f2937;
+            padding: 12px;
+            border-radius: 4px;
+            margin: 8px 0;
+            font-family: 'Courier New', monospace;
+            border-left: 3px solid #2563eb;
+            font-size: 0.9em;
+        }
+
+        .code-block {
+            background: #f9fafb;
+            color: #1f2937;
+            padding: 16px;
+            border-radius: 4px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            border: 1px solid #e5e7eb;
+        }
+
+        .constraint {
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
+            padding: 12px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+
+        .constraint ul {
+            margin-top: 8px;
+        }
+
+        .constraint li {
+            margin-bottom: 4px;
+        }
+
+        .footer {
+            background: #f9fafb;
+            color: #1f2937;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .time-tip {
+            background: #eff6ff;
+            color: #1f2937;
+            padding: 16px;
+            border-radius: 4px;
+            margin: 15px 0;
+            border-left: 3px solid #2563eb;
+        }
+
+        .time-tip h3 {
+            margin-bottom: 12px;
+            color: #2563eb;
+        }
+
+        .time-tip ul {
+            list-style: none;
+            text-align: left;
+        }
+
+        .time-tip li {
+            padding: 6px 0;
+        }
+
+        .highlight {
+            color: #2563eb;
+            font-weight: 600;
+        }
+
+        h3 {
+            margin-top: 20px;
+            margin-bottom: 12px;
+            color: #1f2937;
+            font-size: 1.1em;
+        }
+
+        h4 {
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+            .section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Task Management API</h1>
+            <h2>Technical Coding Assessment</h2>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2 class="section-title">Part 1: Core API</h2>
+                
+                <h3>📋 Basic Requirements</h3>
+                <div class="endpoint">POST    /tasks        → Create task</div>
+                <div class="endpoint">GET     /tasks        → List tasks (status, search filters, pagination, sorting)</div>
+
+                <h3>🎯 Task Model</h3>
+                <div class="code-block">{
+  "id": "string",
+  "title": "string",
+  "description": "string",
+  "status": "pending|in_progress|completed",
+  "created_at": "datetime",
+  "updated_at": "datetime"
+}</div>
+
+                <h3>⚡ Must Implement</h3>
+                <ul class="requirements-list">
+                    <li>Input validation</li>
+                    <li>Proper HTTP status codes</li>
+                    <li>Error handling (400, 404, 500)</li>
+                    <li>Filtering by status and search term</li>
+                    <li>Date range filtering (created_at, updated_at)</li>
+                    <li>Pagination (page number and page size)</li>
+                    <li>Sorting (by any field: id, title, description, status, created_at, updated_at)</li>
+                </ul>
+
+
+            </div>
+
+            <div class="section requirements">
+                <h2 class="section-title">Part 2: Pandas Analytics</h2>
+                
+                <h3>📈 Single Additional Endpoint</h3>
+                <div class="endpoint">GET /analytics/summary → Returns task statistics as JSON</div>
+
+                <h3>🧮 Required Calculations (using pandas)</h3>
+                <ul class="requirements-list">
+                    <li>Task distribution by status</li>
+                    <li>Weekly task completion rate</li>
+                    <li>Average tasks created per day</li>
+                </ul>
+
+                <h3>📊 Example Response</h3>
+                <div class="code-block">{
+  "status_distribution": {"pending": 5, "completed": 3},
+  "weekly_completion_rate": 0.6,
+  "avg_daily_tasks": 2.3
+}</div>
+
+                <h3>🚫 Constraints</h3>
+                <div class="constraint">
+                    <ul style="list-style-type: none; padding-left: 0;">
+                        <li>✓ Use pandas for all calculations</li>
+                        <li>✓ No external database required</li>
+                        <li>✓ Keep data in memory for analysis</li>
+                        <li>✓ Return only JSON (no file exports)</li>
+                    </ul>
+                </div>
+
+
+
+
+        <div class="section">
+            <h2 class="section-title">📤 Submission Requirements</h2>
+            <div class="constraint" style="background: #dbeafe; border-color: #3b82f6;">
+                <h4 style="color: #1e40af; margin-bottom: 15px;">Must Include:</h4>
+                <ul style="list-style-type: none; padding-left: 0;">
+                    <li>✓ Complete source code</li>
+                    <li>✓ README with setup instructions</li>
+                    <li>✓ How to run the API</li>
+                    <li>✓ Example curl commands</li>
+                    <li>✓ Brief explanation of design choices</li>
+                </ul>
+                <h4 style="color: #1e40af; margin-top: 20px; margin-bottom: 15px;">Optional:</h4>
+                <ul style="list-style-type: none; padding-left: 0;">
+                    <li>○ Requirements.txt</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p style="font-size: 1.1em;">Submit as GitHub repository or zip file with all required components</p>
+        </div>
+    </div>
+</body>
+</html>
