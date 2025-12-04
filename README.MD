@@ -36,32 +36,34 @@ The API provides task creation, advanced filtering, sorting, pagination, and ana
 ## Setup Instructions
 
 ### 1. Create virtual environment (recommended)
-
+```
 python3 -m venv venv
-
+```
+```
 Linux / macOS
 source venv/bin/activate
-
+```
+```
 Windows (Command Prompt)
 venv\Scripts\activate.bat
-
+```
 
 
 ### 2. Install dependencies
-
+```
 pip install -r requirements.txt
-
+```
 
 
 ### 3. Run the API server
-
+```
 uvicorn main:app --reload
-
+```
 
 
 API documentation will be available at:
 
-- Swagger UI: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+Swagger UI: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
 ---
 
