@@ -57,6 +57,8 @@ pip install -r requirements.txt
 
 ### 3. Run the API server
 ```
+cd root/Task-3-12-2025/app
+### Then run 
 uvicorn main:app --reload
 ```
 
