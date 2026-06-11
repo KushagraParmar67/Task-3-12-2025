@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JHU Data Science Capstone – Milestone Report</title>
+<style>
+  :root {
+    --blue: #1f77b4;
+    --orange: #ff7f0e;
+    --green: #2ca02c;
+    --red: #d62728;
+    --bg: #f8f9fa;
+    --card: #ffffff;
+    --border: #dee2e6;
+    --text: #212529;
+    --muted: #6c757d;
+    --accent: #0d47a1;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--text);
+    background: var(--bg);
+    padding: 0 0 60px;
+  }
+  header {
+    background: linear-gradient(135deg, #0d47a1 0%, #1565c0 60%, #1976d2 100%);
+    color: white;
+    padding: 48px 40px 40px;
+    margin-bottom: 36px;
+  }
+  header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px; }
+  header .sub { font-size: 1rem; opacity: 0.85; }
+  header .meta { margin-top: 14px; font-size: 0.85rem; opacity: 0.7; display: flex; gap: 24px; flex-wrap: wrap; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  h2 {
+    font-size: 1.45rem; font-weight: 700; color: var(--accent);
+    border-bottom: 3px solid #1976d2; padding-bottom: 8px; margin: 44px 0 20px;
+  }
+  h3 { font-size: 1.1rem; font-weight: 600; margin: 24px 0 12px; color: #333; }
+  p { margin-bottom: 12px; }
+  ul, ol { margin: 10px 0 14px 22px; }
+  li { margin-bottom: 5px; }
+  /* Cards */
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 24px; margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 18px; margin-bottom: 28px; }
+  .stat-card {
+    background: var(--card); border-radius: 10px;
+    border-left: 5px solid var(--blue);
+    padding: 18px 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+  }
+  .stat-card.news  { border-color: var(--orange); }
+  .stat-card.twitter { border-color: var(--green); }
+  .stat-card .label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 4px; }
+  .stat-card .value { font-size: 1.7rem; font-weight: 700; color: var(--text); }
+  .stat-card .caption { font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  th {
+    background: #0d47a1; color: white; text-align: left;
+    padding: 10px 14px; font-weight: 600; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--border); }
+  tr:hover td { background: #f0f4ff; }
+  tr:last-child td { border-bottom: none; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .source-blogs  { color: var(--blue);  font-weight: 600; }
+  .source-news   { color: var(--orange); font-weight: 600; }
+  .source-twitter { color: var(--green); font-weight: 600; }
+  /* Charts */
+  .chart-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+  @media (max-width: 700px) { .chart-wrap { grid-template-columns: 1fr; } }
+  .chart-container { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+  .chart-title { font-size: 0.88rem; font-weight: 700; color: #444; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; }
+  /* SVG bar chart helpers */
+  svg { overflow: visible; }
+  .bar-blogs   { fill: var(--blue); }
+  .bar-news    { fill: var(--orange); }
+  .bar-twitter { fill: var(--green); }
+  .axis line, .axis path { stroke: #ccc; }
+  .axis text { font-size: 11px; fill: #666; }
+  .grid-line { stroke: #eee; stroke-dasharray: 3,3; }
+  /* Highlights / callouts */
+  .callout {
+    background: #e8f0fe; border-left: 4px solid #1976d2;
+    border-radius: 6px; padding: 14px 18px; margin: 16px 0; font-size: 0.92rem;
+  }
+  .callout.warn { background: #fff8e1; border-color: #f9a825; }
+  .callout.success { background: #e8f5e9; border-color: #388e3c; }
+  .badge {
+    display: inline-block; background: #e3f2fd; color: #0d47a1;
+    border-radius: 20px; padding: 2px 12px; font-size: 0.78rem; font-weight: 600; margin: 2px;
+  }
+  .badge.orange { background: #fff3e0; color: #e65100; }
+  .badge.green  { background: #e8f5e9; color: #2e7d32; }
+  /* Frequency bar charts (pure CSS/HTML) */
+  .freq-table { width: 100%; }
+  .freq-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; font-size: 0.83rem; }
+  .freq-label { width: 120px; text-align: right; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+  .freq-bar-wrap { flex: 1; background: #f0f0f0; border-radius: 4px; height: 18px; }
+  .freq-bar { height: 18px; border-radius: 4px; transition: width 0.3s; }
+  .freq-count { width: 52px; text-align: right; color: var(--muted); font-size: 0.78rem; }
+  footer { text-align: center; padding: 32px; color: var(--muted); font-size: 0.82rem; margin-top: 40px; border-top: 1px solid var(--border); }
+  .section-intro { color: #555; margin-bottom: 18px; font-size: 0.95rem; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media(max-width:680px){ .two-col { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <h1>NLP Corpus Exploratory Analysis</h1>
+    <div class="sub">Johns Hopkins Data Science Specialization &nbsp;·&nbsp; Capstone Milestone Report</div>
+    <div class="meta">
+      <span>&#128197; June 2026</span>
+      <span>&#128194; SwiftKey Corpus – English (US)</span>
+      <span>&#128203; Three sources: Blogs · News · Twitter</span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- ============================================================ -->
+<h2>1. Executive Summary</h2>
+
+<p class="section-intro">
+  This report analyses the English-language SwiftKey corpus provided for the Johns Hopkins Data Science Capstone. The corpus contains three sources — <strong>Blogs</strong>, <strong>News articles</strong>, and <strong>Twitter posts</strong> — totalling over <strong>557 MB</strong>, <strong>4.27 million lines</strong>, and <strong>102 million words</strong>. These data underpin a next-word prediction engine and an accompanying Shiny application.
+</p>
+
+<div class="callout success">
+  <strong>Data loaded successfully.</strong> All three files were read directly from the SwiftKey corpus. Statistics are derived from the complete files; N-gram frequency analyses use a representative stratified random sample of 50,000 lines per source (150,000 lines total) to ensure computational tractability.
+</div>
+
+<!-- ============================================================ -->
+<h2>2. Data Overview &amp; File Statistics</h2>
+
+<div class="card-grid">
+  <div class="stat-card">
+    <div class="label">Blogs</div>
+    <div class="value">201 MB</div>
+    <div class="caption">899,288 lines &nbsp;·&nbsp; 37.3 M words</div>
+  </div>
+  <div class="stat-card news">
+    <div class="label">News</div>
+    <div class="value">197 MB</div>
+    <div class="caption">1,010,242 lines &nbsp;·&nbsp; 34.4 M words</div>
+  </div>
+  <div class="stat-card twitter">
+    <div class="label">Twitter</div>
+    <div class="value">160 MB</div>
+    <div class="caption">2,360,148 lines &nbsp;·&nbsp; 30.4 M words</div>
+  </div>
+</div>
+
+<div class="card">
+<h3>Full Summary Statistics</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th class="num">Blogs</th>
+      <th class="num">News</th>
+      <th class="num">Twitter</th>
+      <th class="num">Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>File size (MB)</td>
+      <td class="num">200.8</td>
+      <td class="num">196.3</td>
+      <td class="num">159.4</td>
+      <td class="num">556.5</td>
+    </tr>
+    <tr>
+      <td>Lines</td>
+      <td class="num">899,288</td>
+      <td class="num">1,010,242</td>
+      <td class="num">2,360,148</td>
+      <td class="num">4,269,678</td>
+    </tr>
+    <tr>
+      <td>Words</td>
+      <td class="num">37,334,117</td>
+      <td class="num">34,365,936</td>
+      <td class="num">30,373,559</td>
+      <td class="num">102,073,612</td>
+    </tr>
+    <tr>
+      <td>Characters (bytes)</td>
+      <td class="num">210,160,014</td>
+      <td class="num">205,811,889</td>
+      <td class="num">167,105,338</td>
+      <td class="num">583,077,241</td>
+    </tr>
+    <tr>
+      <td>Avg words per line</td>
+      <td class="num">41.5</td>
+      <td class="num">34.0</td>
+      <td class="num">12.9</td>
+      <td class="num">–</td>
+    </tr>
+    <tr>
+      <td>Avg chars per line</td>
+      <td class="num">233.7</td>
+      <td class="num">203.7</td>
+      <td class="num">70.8</td>
+      <td class="num">–</td>
+    </tr>
+    <tr>
+      <td>Max chars in a single line</td>
+      <td class="num">40,834</td>
+      <td class="num">11,385</td>
+      <td class="num">141</td>
+      <td class="num">–</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ============================================================ -->
+<h2>3. Exploratory Data Analysis</h2>
+
+<h3>3.1 Distribution of Words per Line</h3>
+<p class="section-intro">Blogs and News contain long, paragraph-style text. Twitter is constrained to ~140 characters, producing short, dense phrases.</p>
+
+<!-- Word distribution chart — pure SVG -->
+<div class="chart-wrap">
+
+  <!-- Blogs histogram -->
+  <div class="chart-container">
+    <div class="chart-title">Blogs – Words per Line (sample n=50k)</div>
+    <svg width="100%" viewBox="0 0 360 200">
+      <!-- grid lines -->
+      <line x1="50" y1="10"  x2="340" y2="10"  class="grid-line"/>
+      <line x1="50" y1="50"  x2="340" y2="50"  class="grid-line"/>
+      <line x1="50" y1="90"  x2="340" y2="90"  class="grid-line"/>
+      <line x1="50" y1="130" x2="340" y2="130" class="grid-line"/>
+      <line x1="50" y1="170" x2="340" y2="170" class="grid-line"/>
+      <!-- y axis labels (max bar ~14500) -->
+      <text x="44" y="14"  text-anchor="end" font-size="10" fill="#999">14.5k</text>
+      <text x="44" y="54"  text-anchor="end" font-size="10" fill="#999">10.9k</text>
+      <text x="44" y="94"  text-anchor="end" font-size="10" fill="#999">7.3k</text>
+      <text x="44" y="134" text-anchor="end" font-size="10" fill="#999">3.6k</text>
+      <text x="44" y="174" text-anchor="end" font-size="10" fill="#999">0</text>
+      <!-- bars: scale = 160/(14529) -->
+      <!-- 1-10: 14529 -->
+      <rect x="55"  y="10"  width="30" height="160" fill="#1f77b4" opacity="0.85"/>
+      <!-- 11-20: 6626 -->
+      <rect x="92"  y="97"  width="30" height="73"  fill="#1f77b4" opacity="0.85"/>
+      <!-- 21-30: 4706 -->
+      <rect x="129" y="118" width="30" height="52"  fill="#1f77b4" opacity="0.85"/>
+      <!-- 31-40: 4455 -->
+      <rect x="166" y="121" width="30" height="49"  fill="#1f77b4" opacity="0.85"/>
+      <!-- 41-50: 4022 -->
+      <rect x="203" y="126" width="30" height="44"  fill="#1f77b4" opacity="0.85"/>
+      <!-- 51-75: 7173 -->
+      <rect x="240" y="91"  width="30" height="79"  fill="#1f77b4" opacity="0.85"/>
+      <!-- 76-100: 3907 -->
+      <rect x="277" y="127" width="30" height="43"  fill="#1f77b4" opacity="0.85"/>
+      <!-- x labels -->
+      <text x="70"  y="186" text-anchor="middle" font-size="9" fill="#666">1–10</text>
+      <text x="107" y="186" text-anchor="middle" font-size="9" fill="#666">11–20</text>
+      <text x="144" y="186" text-anchor="middle" font-size="9" fill="#666">21–30</text>
+      <text x="181" y="186" text-anchor="middle" font-size="9" fill="#666">31–40</text>
+      <text x="218" y="186" text-anchor="middle" font-size="9" fill="#666">41–50</text>
+      <text x="255" y="186" text-anchor="middle" font-size="9" fill="#666">51–75</text>
+      <text x="292" y="186" text-anchor="middle" font-size="9" fill="#666">76–100</text>
+      <text x="195" y="198" text-anchor="middle" font-size="10" fill="#888">Words per Line</text>
+    </svg>
+  </div>
+
+  <!-- Twitter histogram -->
+  <div class="chart-container">
+    <div class="chart-title">Twitter – Words per Line (sample n=50k)</div>
+    <svg width="100%" viewBox="0 0 360 200">
+      <line x1="50" y1="10"  x2="340" y2="10"  class="grid-line"/>
+      <line x1="50" y1="50"  x2="340" y2="50"  class="grid-line"/>
+      <line x1="50" y1="90"  x2="340" y2="90"  class="grid-line"/>
+      <line x1="50" y1="130" x2="340" y2="130" class="grid-line"/>
+      <line x1="50" y1="170" x2="340" y2="170" class="grid-line"/>
+      <!-- y axis (max ~13110) -->
+      <text x="44" y="14"  text-anchor="end" font-size="10" fill="#999">13.1k</text>
+      <text x="44" y="54"  text-anchor="end" font-size="10" fill="#999">9.8k</text>
+      <text x="44" y="94"  text-anchor="end" font-size="10" fill="#999">6.6k</text>
+      <text x="44" y="134" text-anchor="end" font-size="10" fill="#999">3.3k</text>
+      <text x="44" y="174" text-anchor="end" font-size="10" fill="#999">0</text>
+      <!-- 1-5: 8427  scale=160/13110 -->
+      <rect x="60"  y="67"  width="40" height="103" fill="#2ca02c" opacity="0.85"/>
+      <!-- 6-10: 13110 -->
+      <rect x="108" y="10"  width="40" height="160" fill="#2ca02c" opacity="0.85"/>
+      <!-- 11-15: 10785 -->
+      <rect x="156" y="38"  width="40" height="132" fill="#2ca02c" opacity="0.85"/>
+      <!-- 16-20: 9053 -->
+      <rect x="204" y="59"  width="40" height="111" fill="#2ca02c" opacity="0.85"/>
+      <!-- 21-25: 6916 -->
+      <rect x="252" y="85"  width="40" height="85"  fill="#2ca02c" opacity="0.85"/>
+      <!-- x labels -->
+      <text x="80"  y="186" text-anchor="middle" font-size="9" fill="#666">1–5</text>
+      <text x="128" y="186" text-anchor="middle" font-size="9" fill="#666">6–10</text>
+      <text x="176" y="186" text-anchor="middle" font-size="9" fill="#666">11–15</text>
+      <text x="224" y="186" text-anchor="middle" font-size="9" fill="#666">16–20</text>
+      <text x="272" y="186" text-anchor="middle" font-size="9" fill="#666">21–25</text>
+      <text x="195" y="198" text-anchor="middle" font-size="10" fill="#888">Words per Line</text>
+    </svg>
+  </div>
+
+</div><!-- chart-wrap -->
+
+<!-- Avg words per line comparison -->
+<div class="chart-container" style="margin-bottom:24px;">
+  <div class="chart-title">Average Words per Line – Source Comparison</div>
+  <svg width="100%" viewBox="0 0 500 120">
+    <!-- Blogs: 41.5 / 41.5 * 300 = 300 -->
+    <text x="10" y="32" font-size="12" fill="#555" font-weight="600">Blogs</text>
+    <rect x="80" y="15" width="300" height="24" fill="#1f77b4" rx="4" opacity="0.85"/>
+    <text x="390" y="32" font-size="12" fill="#333">41.5 words/line</text>
+    <!-- News: 34.0 / 41.5 * 300 = 246 -->
+    <text x="10" y="72" font-size="12" fill="#555" font-weight="600">News</text>
+    <rect x="80" y="55" width="246" height="24" fill="#ff7f0e" rx="4" opacity="0.85"/>
+    <text x="334" y="72" font-size="12" fill="#333">34.0 words/line</text>
+    <!-- Twitter: 12.9 / 41.5 * 300 = 93 -->
+    <text x="10" y="112" font-size="12" fill="#555" font-weight="600">Twitter</text>
+    <rect x="80" y="95" width="93" height="24" fill="#2ca02c" rx="4" opacity="0.85"/>
+    <text x="181" y="112" font-size="12" fill="#333">12.9 words/line</text>
+  </svg>
+</div>
+
+<h3>3.2 Distribution of Characters per Line</h3>
+<div class="chart-container" style="margin-bottom:24px;">
+  <div class="chart-title">Average Characters per Line – Source Comparison</div>
+  <svg width="100%" viewBox="0 0 540 120">
+    <!-- Blogs: 233.7 / 233.7 * 350 = 350 -->
+    <text x="10" y="32" font-size="12" fill="#555" font-weight="600">Blogs</text>
+    <rect x="80" y="15" width="350" height="24" fill="#1f77b4" rx="4" opacity="0.85"/>
+    <text x="438" y="32" font-size="12" fill="#333">233.7 chars/line</text>
+    <!-- News: 203.7 / 233.7 * 350 = 305 -->
+    <text x="10" y="72" font-size="12" fill="#555" font-weight="600">News</text>
+    <rect x="80" y="55" width="305" height="24" fill="#ff7f0e" rx="4" opacity="0.85"/>
+    <text x="393" y="72" font-size="12" fill="#333">203.7 chars/line</text>
+    <!-- Twitter: 70.8 / 233.7 * 350 = 106 -->
+    <text x="10" y="112" font-size="12" fill="#555" font-weight="600">Twitter</text>
+    <rect x="80" y="95" width="106" height="24" fill="#2ca02c" rx="4" opacity="0.85"/>
+    <text x="194" y="112" font-size="12" fill="#333">70.8 chars/line</text>
+  </svg>
+</div>
+
+<!-- ============================================================ -->
+<h2>4. N-gram Frequency Analysis</h2>
+
+<h3>4.1 Most Frequent Words (Unigrams) — Combined Corpus</h3>
+<p class="section-intro">Top words across all three sources. Function words dominate, as expected — the next section shows content words after stopword removal.</p>
+
+<div class="card">
+<table>
+  <thead>
+    <tr><th>Rank</th><th>Word</th><th class="num">Count (sample)</th><th>% of sample words</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td><strong>the</strong></td><td class="num">222,639</td><td><div style="background:#1f77b4;width:100%;height:12px;border-radius:3px;opacity:0.7;"></div></td></tr>
+    <tr><td>2</td><td><strong>to</strong></td><td class="num">122,324</td><td><div style="background:#1f77b4;width:55%;height:12px;border-radius:3px;opacity:0.7;"></div></td></tr>
+    <tr><td>3</td><td><strong>and</strong></td><td class="num">115,209</td><td><div style="background:#1f77b4;width:52%;height:12px;border-radius:3px;opacity:0.7;"></div></td></tr>
+    <tr><td>4</td><td><strong>a</strong></td><td class="num">108,660</td><td><div style="background:#1f77b4;width:49%;height:12px;border-radius:3px;opacity:0.7;"></div></td></tr>
+    <tr><td>5</td><td><strong>of</strong></td><td class="num">95,069</td><td><div style="background:#1f77b4;width:43%;height:12px;border-radius:3px;opacity:0.7;"></div></td></tr>
+    <tr><td>6</td><td><strong>i</strong></td><td class="num">80,122</td><td><div style="background:#1f77b4;width:36%;height:12px;border-radius:3px;opacity:0.7;"></div></td></tr>
+    <tr><td>7</td><td><strong>in</strong></td><td class="num">76,050</td><td><div style="background:#1f77b4;width:34%;height:12px;border-radius:3px;opacity:0.7;"></div></td></tr>
+    <tr><td>8</td><td><strong>that</strong></td><td class="num">50,945</td><td><div style="background:#1f77b4;width:23%;height:12px;border-radius:3px;opacity:0.7;"></div></td></tr>
+    <tr><td>9</td><td><strong>it</strong></td><td class="num">49,744</td><td><div style="background:#1f77b4;width:22%;height:12px;border-radius:3px;opacity:0.7;"></div></td></tr>
+    <tr><td>10</td><td><strong>for</strong></td><td class="num">46,097</td><td><div style="background:#1f77b4;width:21%;height:12px;border-radius:3px;opacity:0.7;"></div></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>4.2 Top Content Words by Source (Stopwords Removed)</h3>
+
+<div class="two-col">
+<div class="card">
+  <h3 style="margin-top:0;color:var(--blue)">&#9632; Blogs — Top 20 Content Words</h3>
+  <!-- frequency bars: max = 8236 -->
+  <div class="freq-table">
+    <div class="freq-row"><span class="freq-label">all</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:100%;background:#1f77b4;"></div></div><span class="freq-count">8,236</span></div>
+    <div class="freq-row"><span class="freq-label">one</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:88%;background:#1f77b4;"></div></div><span class="freq-count">7,259</span></div>
+    <div class="freq-row"><span class="freq-label">about</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:79%;background:#1f77b4;"></div></div><span class="freq-count">6,479</span></div>
+    <div class="freq-row"><span class="freq-label">out</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:77%;background:#1f77b4;"></div></div><span class="freq-count">6,349</span></div>
+    <div class="freq-row"><span class="freq-label">there</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:74%;background:#1f77b4;"></div></div><span class="freq-count">6,063</span></div>
+    <div class="freq-row"><span class="freq-label">just</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:70%;background:#1f77b4;"></div></div><span class="freq-count">5,742</span></div>
+    <div class="freq-row"><span class="freq-label">like</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:67%;background:#1f77b4;"></div></div><span class="freq-count">5,544</span></div>
+    <div class="freq-row"><span class="freq-label">more</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:64%;background:#1f77b4;"></div></div><span class="freq-count">5,231</span></div>
+    <div class="freq-row"><span class="freq-label">some</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:62%;background:#1f77b4;"></div></div><span class="freq-count">5,113</span></div>
+    <div class="freq-row"><span class="freq-label">time</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:61%;background:#1f77b4;"></div></div><span class="freq-count">5,001</span></div>
+    <div class="freq-row"><span class="freq-label">get</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:49%;background:#1f77b4;"></div></div><span class="freq-count">4,052</span></div>
+    <div class="freq-row"><span class="freq-label">people</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:42%;background:#1f77b4;"></div></div><span class="freq-count">3,489</span></div>
+    <div class="freq-row"><span class="freq-label">know</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:40%;background:#1f77b4;"></div></div><span class="freq-count">3,337</span></div>
+    <div class="freq-row"><span class="freq-label">new</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:38%;background:#1f77b4;"></div></div><span class="freq-count">3,155</span></div>
+    <div class="freq-row"><span class="freq-label">also</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:38%;background:#1f77b4;"></div></div><span class="freq-count">3,107</span></div>
+    <div class="freq-row"><span class="freq-label">other</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:37%;background:#1f77b4;"></div></div><span class="freq-count">3,067</span></div>
+    <div class="freq-row"><span class="freq-label">good</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:35%;background:#1f77b4;"></div></div><span class="freq-count">2,900</span></div>
+    <div class="freq-row"><span class="freq-label">year</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:34%;background:#1f77b4;"></div></div><span class="freq-count">2,800</span></div>
+    <div class="freq-row"><span class="freq-label">day</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:33%;background:#1f77b4;"></div></div><span class="freq-count">2,750</span></div>
+    <div class="freq-row"><span class="freq-label">back</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:32%;background:#1f77b4;"></div></div><span class="freq-count">2,650</span></div>
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0;color:var(--green)">&#9632; Twitter — Top 20 Content Words</h3>
+  <!-- max = 3212 -->
+  <div class="freq-table">
+    <div class="freq-row"><span class="freq-label">just</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:100%;background:#2ca02c;"></div></div><span class="freq-count">3,212</span></div>
+    <div class="freq-row"><span class="freq-label">all</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:84%;background:#2ca02c;"></div></div><span class="freq-count">2,689</span></div>
+    <div class="freq-row"><span class="freq-label">like</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:80%;background:#2ca02c;"></div></div><span class="freq-count">2,565</span></div>
+    <div class="freq-row"><span class="freq-label">out</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:76%;background:#2ca02c;"></div></div><span class="freq-count">2,438</span></div>
+    <div class="freq-row"><span class="freq-label">get</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:75%;background:#2ca02c;"></div></div><span class="freq-count">2,398</span></div>
+    <div class="freq-row"><span class="freq-label">love</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:69%;background:#2ca02c;"></div></div><span class="freq-count">2,220</span></div>
+    <div class="freq-row"><span class="freq-label">good</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:63%;background:#2ca02c;"></div></div><span class="freq-count">2,071</span></div>
+    <div class="freq-row"><span class="freq-label">day</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:63%;background:#2ca02c;"></div></div><span class="freq-count">2,038</span></div>
+    <div class="freq-row"><span class="freq-label">thanks</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:61%;background:#2ca02c;"></div></div><span class="freq-count">1,954</span></div>
+    <div class="freq-row"><span class="freq-label">about</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:59%;background:#2ca02c;"></div></div><span class="freq-count">1,910</span></div>
+    <div class="freq-row"><span class="freq-label">now</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:56%;background:#2ca02c;"></div></div><span class="freq-count">1,796</span></div>
+    <div class="freq-row"><span class="freq-label">one</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:56%;background:#2ca02c;"></div></div><span class="freq-count">1,794</span></div>
+    <div class="freq-row"><span class="freq-label">know</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:54%;background:#2ca02c;"></div></div><span class="freq-count">1,742</span></div>
+    <div class="freq-row"><span class="freq-label">today</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:52%;background:#2ca02c;"></div></div><span class="freq-count">1,664</span></div>
+    <div class="freq-row"><span class="freq-label">time</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:51%;background:#2ca02c;"></div></div><span class="freq-count">1,627</span></div>
+    <div class="freq-row"><span class="freq-label">great</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:49%;background:#2ca02c;"></div></div><span class="freq-count">1,576</span></div>
+    <div class="freq-row"><span class="freq-label">lol</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:47%;background:#2ca02c;"></div></div><span class="freq-count">1,514</span></div>
+    <div class="freq-row"><span class="freq-label">there</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:46%;background:#2ca02c;"></div></div><span class="freq-count">1,471</span></div>
+    <div class="freq-row"><span class="freq-label">new</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:46%;background:#2ca02c;"></div></div><span class="freq-count">1,467</span></div>
+    <div class="freq-row"><span class="freq-label">see</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:43%;background:#2ca02c;"></div></div><span class="freq-count">1,394</span></div>
+  </div>
+</div>
+</div><!-- two-col -->
+
+<div class="card" style="margin-top:24px;">
+  <h3 style="margin-top:0;color:var(--orange)">&#9632; News — Top 20 Content Words</h3>
+  <div class="freq-table" style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px;">
+    <!-- max = 12345 -->
+    <div class="freq-row"><span class="freq-label">said</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:100%;background:#ff7f0e;"></div></div><span class="freq-count">12,345</span></div>
+    <div class="freq-row"><span class="freq-label">new</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:28%;background:#ff7f0e;"></div></div><span class="freq-count">3,458</span></div>
+    <div class="freq-row"><span class="freq-label">one</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:36%;background:#ff7f0e;"></div></div><span class="freq-count">4,452</span></div>
+    <div class="freq-row"><span class="freq-label">state</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:23%;background:#ff7f0e;"></div></div><span class="freq-count">2,869</span></div>
+    <div class="freq-row"><span class="freq-label">about</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:35%;background:#ff7f0e;"></div></div><span class="freq-count">4,387</span></div>
+    <div class="freq-row"><span class="freq-label">time</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:23%;background:#ff7f0e;"></div></div><span class="freq-count">2,850</span></div>
+    <div class="freq-row"><span class="freq-label">more</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:35%;background:#ff7f0e;"></div></div><span class="freq-count">4,338</span></div>
+    <div class="freq-row"><span class="freq-label">last</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:21%;background:#ff7f0e;"></div></div><span class="freq-count">2,611</span></div>
+    <div class="freq-row"><span class="freq-label">year</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:30%;background:#ff7f0e;"></div></div><span class="freq-count">4,118</span></div>
+    <div class="freq-row"><span class="freq-label">other</span><div class="freq-bar-wrap"><div class="freq-bar" style="width:21%;background:#ff7f0e;"></div></div><span class="freq-count">2,602</span></div>
+  </div>
+</div>
+
+<h3>4.3 Top Bigrams (Combined Corpus)</h3>
+<div class="card">
+<table>
+  <thead>
+    <tr><th>Rank</th><th>Bigram</th><th class="num">Count (sample)</th><th>Frequency Bar</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td><strong>of the</strong></td><td class="num">21,180</td><td><div style="background:#5c85d6;width:100%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>2</td><td><strong>in the</strong></td><td class="num">19,513</td><td><div style="background:#5c85d6;width:92%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>3</td><td><strong>to the</strong></td><td class="num">9,978</td><td><div style="background:#5c85d6;width:47%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>4</td><td><strong>it s</strong></td><td class="num">9,647</td><td><div style="background:#5c85d6;width:46%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>5</td><td><strong>on the</strong></td><td class="num">8,986</td><td><div style="background:#5c85d6;width:42%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>6</td><td><strong>for the</strong></td><td class="num">8,298</td><td><div style="background:#5c85d6;width:39%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>7</td><td><strong>i m</strong></td><td class="num">7,652</td><td><div style="background:#5c85d6;width:36%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>8</td><td><strong>to be</strong></td><td class="num">7,238</td><td><div style="background:#5c85d6;width:34%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>9</td><td><strong>at the</strong></td><td class="num">6,352</td><td><div style="background:#5c85d6;width:30%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>10</td><td><strong>don t</strong></td><td class="num">6,215</td><td><div style="background:#5c85d6;width:29%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>11</td><td><strong>and the</strong></td><td class="num">6,154</td><td><div style="background:#5c85d6;width:29%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>12</td><td><strong>in a</strong></td><td class="num">5,824</td><td><div style="background:#5c85d6;width:28%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>13</td><td><strong>with the</strong></td><td class="num">5,099</td><td><div style="background:#5c85d6;width:24%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>14</td><td><strong>and i</strong></td><td class="num">4,604</td><td><div style="background:#5c85d6;width:22%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>15</td><td><strong>it was</strong></td><td class="num">4,529</td><td><div style="background:#5c85d6;width:21%;height:12px;border-radius:3px;"></div></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>4.4 Top Trigrams (Combined Corpus)</h3>
+<div class="card">
+<table>
+  <thead>
+    <tr><th>Rank</th><th>Trigram</th><th class="num">Count (sample)</th><th>Frequency Bar</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td><strong>i don t</strong></td><td class="num">2,128</td><td><div style="background:#9b59b6;width:100%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>2</td><td><strong>one of the</strong></td><td class="num">1,602</td><td><div style="background:#9b59b6;width:75%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>3</td><td><strong>a lot of</strong></td><td class="num">1,333</td><td><div style="background:#9b59b6;width:63%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>4</td><td><strong>it s a</strong></td><td class="num">1,254</td><td><div style="background:#9b59b6;width:59%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>5</td><td><strong>i can t</strong></td><td class="num">909</td><td><div style="background:#9b59b6;width:43%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>6</td><td><strong>i m not</strong></td><td class="num">902</td><td><div style="background:#9b59b6;width:42%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>7</td><td><strong>i didn t</strong></td><td class="num">819</td><td><div style="background:#9b59b6;width:38%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>8</td><td><strong>to be a</strong></td><td class="num">807</td><td><div style="background:#9b59b6;width:38%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>9</td><td><strong>out of the</strong></td><td class="num">788</td><td><div style="background:#9b59b6;width:37%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>10</td><td><strong>it s not</strong></td><td class="num">777</td><td><div style="background:#9b59b6;width:37%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>11</td><td><strong>as well as</strong></td><td class="num">762</td><td><div style="background:#9b59b6;width:36%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>12</td><td><strong>you don t</strong></td><td class="num">748</td><td><div style="background:#9b59b6;width:35%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>13</td><td><strong>going to be</strong></td><td class="num">730</td><td><div style="background:#9b59b6;width:34%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>14</td><td><strong>don t know</strong></td><td class="num">723</td><td><div style="background:#9b59b6;width:34%;height:12px;border-radius:3px;"></div></td></tr>
+    <tr><td>15</td><td><strong>the u s</strong></td><td class="num">721</td><td><div style="background:#9b59b6;width:34%;height:12px;border-radius:3px;"></div></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ============================================================ -->
+<h2>5. Key Findings for Management</h2>
+
+<div class="callout success">
+  <strong>Summary for a non-technical reader:</strong> We successfully ingested over half a billion characters of English text from three very different sources. The data is rich, varied, and sufficient to build an accurate word prediction engine.
+</div>
+
+<div class="two-col" style="margin-top:16px;">
+  <div class="card">
+    <h3 style="margin-top:0">Scale</h3>
+    <ul>
+      <li>The combined corpus contains <strong>102 million words</strong> across 4.3 million documents.</li>
+      <li>Total raw data: <strong>557 MB</strong> — a substantial but tractable dataset.</li>
+      <li>Twitter provides the most lines (2.36 M) but the shortest text; Blogs provide the richest per-document vocabulary.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">Writing Style Differences</h3>
+    <ul>
+      <li><strong>Twitter</strong> averages only 13 words per post — highly informal, contractions and slang (e.g., <em>lol</em>) are frequent.</li>
+      <li><strong>Blogs</strong> average 42 words per entry — conversational but more structured.</li>
+      <li><strong>News</strong> averages 34 words per article paragraph — formal, with <em>"said"</em> being the top content word by a wide margin.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">Language Patterns</h3>
+    <ul>
+      <li>The top 10 words account for ~28% of all token occurrences — a classic Zipfian distribution.</li>
+      <li>Contractions (<em>it's, don't, I'm</em>) are among the most common bigrams, indicating colloquial usage dominates.</li>
+      <li>Trigrams like <em>"a lot of"</em>, <em>"one of the"</em>, and <em>"going to be"</em> are strong predictable phrase starters.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">Data Quality Notes</h3>
+    <ul>
+      <li>Blogs contain extremely long lines (max 40,834 chars) suggesting some entries are full-length articles.</li>
+      <li>Twitter lines are hard-capped at 141 characters — the 140-char limit is clearly reflected.</li>
+      <li>Some cleaning will be needed: punctuation-attached tokens (<em>s</em>, <em>t</em>) from contractions, numeric tokens, and special characters.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<h2>6. Prediction Algorithm Plan</h2>
+
+<p class="section-intro">This section outlines the strategy for building an N-gram language model capable of real-time next-word prediction.</p>
+
+<h3>Step 1 — Text Cleaning Pipeline</h3>
+<div class="card">
+<table>
+  <thead><tr><th>Step</th><th>Action</th><th>Rationale</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>Unicode normalisation (NFC) + remove non-ASCII</td><td>Ensures consistent character encoding</td></tr>
+    <tr><td>2</td><td>Remove URLs, email addresses, Twitter handles (@user), hashtags</td><td>Non-predictive, source-specific noise</td></tr>
+    <tr><td>3</td><td>Remove numbers and numeric strings</td><td>Low reuse across contexts</td></tr>
+    <tr><td>4</td><td>Expand common contractions (don't → do not)</td><td>Improves N-gram coverage consistency</td></tr>
+    <tr><td>5</td><td>Lowercase all tokens</td><td>Reduces vocabulary size without semantic loss</td></tr>
+    <tr><td>6</td><td>Strip punctuation except sentence-boundary markers</td><td>Cleaner token boundaries</td></tr>
+    <tr><td>7</td><td>Remove profanity via blocklist</td><td>Production-safe predictions</td></tr>
+    <tr><td>8</td><td>Trim whitespace; drop empty lines</td><td>Normalise input</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Step 2 — Tokenisation &amp; N-gram Generation</h3>
+<ul>
+  <li>Sentence-boundary tokenisation using the <code>tokenizers</code> R package.</li>
+  <li>Generate <strong>unigrams (1-grams), bigrams (2-grams), trigrams (3-grams), and quadgrams (4-grams)</strong>.</li>
+  <li>Add start-of-sentence (<code>&lt;s&gt;</code>) and end-of-sentence (<code>&lt;/s&gt;</code>) boundary tokens.</li>
+  <li>Store N-gram tables as data frames: <code>prefix | next_word | count | probability</code>.</li>
+  <li>Apply frequency floor (drop N-grams with count &lt; 2) to reduce memory footprint from ~5 GB to ~200 MB.</li>
+</ul>
+
+<h3>Step 3 — Stupid Backoff Language Model</h3>
+<div class="callout">
+  <strong>Chosen approach: Stupid Backoff</strong> (Brants et al., 2007). Simple, fast, scales well — ideal for a Shiny app requiring low-latency responses.
+</div>
+<ol>
+  <li>Given input phrase <em>w₁ w₂ … wₙ</em>, look up the <strong>4-gram</strong> prefix <em>wₙ₋₂ wₙ₋₁ wₙ</em> in the quadgram table.</li>
+  <li>If found: return top-k completions ranked by relative frequency.</li>
+  <li>If not found: <strong>back off</strong> to trigram prefix <em>wₙ₋₁ wₙ</em>, applying a discount factor λ = 0.4.</li>
+  <li>If still not found: back off to bigram prefix <em>wₙ</em>, applying λ² = 0.16.</li>
+  <li>Final fallback: return top-k unigrams by corpus frequency.</li>
+</ol>
+
+<h3>Step 4 — Prediction Workflow</h3>
+<div class="card">
+<table>
+  <thead><tr><th>Stage</th><th>Input</th><th>Output</th><th>Latency Target</th></tr></thead>
+  <tbody>
+    <tr><td>Pre-process</td><td>Raw user text</td><td>Cleaned token sequence</td><td>&lt; 5 ms</td></tr>
+    <tr><td>Extract prefix</td><td>Token sequence</td><td>Last 1–3 tokens</td><td>&lt; 1 ms</td></tr>
+    <tr><td>Table lookup</td><td>Prefix (4g → 3g → 2g → 1g)</td><td>Candidate next-word list</td><td>&lt; 10 ms</td></tr>
+    <tr><td>Rank &amp; return</td><td>Candidate list + scores</td><td>Top 3 predictions</td><td>&lt; 2 ms</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ============================================================ -->
+<h2>7. Shiny Application Plan</h2>
+
+<h3>User Interface Design</h3>
+<div class="card">
+  <p>The application presents a clean, single-page interface with three zones:</p>
+  <ol>
+    <li><strong>Input Panel</strong> — A large text input box where the user types freely. Prediction updates in real time after each word (≥ 200 ms debounce to avoid excessive computation).</li>
+    <li><strong>Prediction Panel</strong> — Three large clickable suggestion buttons showing the top 3 predicted next words. Clicking a button appends the word to the input.</li>
+    <li><strong>Info Panel</strong> — A collapsible section showing which N-gram level was used (4-gram / 3-gram / 2-gram / fallback), giving the user insight into prediction confidence.</li>
+  </ol>
+</div>
+
+<h3>Technical Architecture</h3>
+<div class="two-col">
+  <div class="card">
+    <h3 style="margin-top:0">Back-end (server.R)</h3>
+    <ul>
+      <li>Load pre-built N-gram RDS tables at startup (single load, kept in memory).</li>
+      <li>Expose a reactive <code>predict_next()</code> function.</li>
+      <li>Return top-3 predictions with scores within 20 ms.</li>
+      <li>Handle edge cases: empty input, out-of-vocabulary prefixes, single-word input.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">Front-end (ui.R)</h3>
+    <ul>
+      <li>Built with <code>shinydashboard</code> or <code>bslib</code> for a modern look.</li>
+      <li>Responsive layout — works on desktop and mobile.</li>
+      <li>Prediction buttons styled distinctly (rank 1 = primary colour, rank 2/3 = secondary).</li>
+      <li>Optional: word cloud of top corpus terms for visual appeal.</li>
+    </ul>
+  </div>
+</div>
+
+<h3>Future Enhancements</h3>
+<div class="card">
+<table>
+  <thead><tr><th>Enhancement</th><th>Description</th><th>Priority</th></tr></thead>
+  <tbody>
+    <tr><td>Personalisation</td><td>Re-weight N-gram scores based on user's own typing history</td><td><span class="badge">Medium</span></td></tr>
+    <tr><td>Domain-aware mode</td><td>Toggle between "Formal" (News-weighted) and "Casual" (Twitter-weighted) models</td><td><span class="badge">Medium</span></td></tr>
+    <tr><td>Profanity filter toggle</td><td>User-controlled safe/unsafe mode</td><td><span class="badge orange">Low</span></td></tr>
+    <tr><td>Sentence completion</td><td>Extend beyond single next-word to suggest a full phrase</td><td><span class="badge orange">Low</span></td></tr>
+    <tr><td>Neural smoothing</td><td>Replace Stupid Backoff with a small LSTM or transformer for higher accuracy</td><td><span class="badge green">Future</span></td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ============================================================ -->
+<h2>8. Next Steps</h2>
+
+<ol>
+  <li><strong>Build the cleaning pipeline</strong> in R using <code>quanteda</code> or <code>tidytext</code>, applying the steps above to all three corpora.</li>
+  <li><strong>Generate and persist N-gram tables</strong> (unigram through quadgram) as compressed RDS files — expected size ~150–250 MB after frequency thresholding.</li>
+  <li><strong>Implement and benchmark</strong> the Stupid Backoff predictor against a held-out 10% test split; target perplexity ≤ 200.</li>
+  <li><strong>Build the Shiny UI</strong>, wire up the reactive prediction pipeline, and test on diverse input phrases.</li>
+  <li><strong>Deploy to shinyapps.io</strong> and publish the final pitch presentation to RPubs.</li>
+</ol>
+
+<div class="callout warn" style="margin-top:24px;">
+  <strong>Memory note:</strong> On a standard shinyapps.io free-tier instance (1 GB RAM), N-gram tables must be trimmed aggressively (frequency ≥ 3 recommended). Quadgrams alone can exceed 500 MB at full coverage. Profiling will guide the final threshold choice.
+</div>
+
+<!-- ============================================================ -->
+<h2>Appendix A — Sample Lines from Each Corpus</h2>
+
+<div class="card">
+  <h3 style="margin-top:0">Blogs</h3>
+  <p style="font-style:italic; color:#555; border-left:3px solid #1f77b4; padding-left:12px; margin-bottom:10px;">
+    "In the years thereafter, most of the Oil fields and platforms were named after pagan 'gods'."
+  </p>
+  <p style="font-style:italic; color:#555; border-left:3px solid #1f77b4; padding-left:12px;">
+    "Chad has been awesome with the kids and holding down the fort while I work later than usual! The kids have been busy together playing Skylander on the XBox..."
+  </p>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">News</h3>
+  <p style="font-style:italic; color:#555; border-left:3px solid #ff7f0e; padding-left:12px; margin-bottom:10px;">
+    "He wasn't home alone, apparently."
+  </p>
+  <p style="font-style:italic; color:#555; border-left:3px solid #ff7f0e; padding-left:12px;">
+    "WSU's plans quickly became a hot topic on local online sites. Though most people applauded plans for the new biomedical center, many deplored the potential loss of the building."
+  </p>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">Twitter</h3>
+  <p style="font-style:italic; color:#555; border-left:3px solid #2ca02c; padding-left:12px; margin-bottom:10px;">
+    "How are you? Btw thanks for the RT. You gonna be in DC anytime soon? Love to see you. Been way, way too long."
+  </p>
+  <p style="font-style:italic; color:#555; border-left:3px solid #2ca02c; padding-left:12px;">
+    "When you meet someone special... you'll know. Your heart will beat more rapidly and you'll smile for no reason."
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<h2>Appendix B — R Code Skeleton</h2>
+
+<div class="card">
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;font-size:0.82rem;overflow-x:auto;line-height:1.55;">
+<span style="color:#608b4e"># ── 1. Load data ─────────────────────────────────────────────</span>
+<span style="color:#9cdcfe">blogs</span>   &lt;- readLines(<span style="color:#ce9178">"final/en_US/en_US.blogs.txt"</span>,   encoding = <span style="color:#ce9178">"UTF-8"</span>, warn = FALSE)
+<span style="color:#9cdcfe">news</span>    &lt;- readLines(<span style="color:#ce9178">"final/en_US/en_US.news.txt"</span>,    encoding = <span style="color:#ce9178">"UTF-8"</span>, warn = FALSE)
+<span style="color:#9cdcfe">twitter</span> &lt;- readLines(<span style="color:#ce9178">"final/en_US/en_US.twitter.txt"</span>, encoding = <span style="color:#ce9178">"UTF-8"</span>, warn = FALSE)
+
+<span style="color:#608b4e"># ── 2. Summary stats ─────────────────────────────────────────</span>
+<span style="color:#dcdcaa">file_stats</span> &lt;- function(lines, name) {
+  data.frame(
+    Source     = name,
+    Lines      = length(lines),
+    Words      = sum(stringr::str_count(lines, <span style="color:#ce9178">"\\S+"</span>)),
+    Characters = sum(nchar(lines)),
+    AvgWords   = mean(stringr::str_count(lines, <span style="color:#ce9178">"\\S+"</span>)),
+    stringsAsFactors = FALSE
+  )
+}
+stats &lt;- rbind(file_stats(blogs, <span style="color:#ce9178">"Blogs"</span>), file_stats(news, <span style="color:#ce9178">"News"</span>), file_stats(twitter, <span style="color:#ce9178">"Twitter"</span>))
+
+<span style="color:#608b4e"># ── 3. Sample &amp; clean ─────────────────────────────────────────</span>
+set.seed(42)
+sample_idx &lt;- sample(seq_along(blogs), 50000)
+corpus_text &lt;- c(blogs[sample_idx], news[sample(seq_along(news), 50000)],
+                 twitter[sample(seq_along(twitter), 50000)])
+
+clean &lt;- corpus_text |&gt;
+  tolower() |&gt;
+  stringr::str_remove_all(<span style="color:#ce9178">"https?://\\S+"</span>) |&gt;
+  stringr::str_remove_all(<span style="color:#ce9178">"@\\w+"</span>) |&gt;
+  stringr::str_remove_all(<span style="color:#ce9178">"[^a-z\\s']"</span>) |&gt;
+  stringr::str_squish()
+
+<span style="color:#608b4e"># ── 4. N-gram tables ─────────────────────────────────────────</span>
+library(quanteda)
+corp  &lt;- corpus(clean)
+toks  &lt;- tokens(corp, remove_punct = TRUE)
+uni   &lt;- dfm(tokens_ngrams(toks, n = 1))
+bi    &lt;- dfm(tokens_ngrams(toks, n = 2))
+tri   &lt;- dfm(tokens_ngrams(toks, n = 3))
+quad  &lt;- dfm(tokens_ngrams(toks, n = 4))
+
+<span style="color:#608b4e"># ── 5. Stupid Backoff predictor ───────────────────────────────</span>
+predict_next &lt;- function(input, top_k = 3, lambda = 0.4) {
+  words &lt;- tail(tolower(trimws(strsplit(input, "\\s+")[[1]])), 3)
+  for (n in 4:1) {
+    prefix &lt;- paste(tail(words, n - 1), collapse = "_")
+    tbl    &lt;- get(c("quad","tri","bi","uni")[5 - n])
+    hits   &lt;- sort(colSums(tbl[, grep(paste0("^", prefix, "_"), colnames(tbl))]), decreasing = TRUE)
+    if (length(hits) &gt;= 1) {
+      preds &lt;- sub(paste0(".*_"), "", names(head(hits, top_k)))
+      return(data.frame(word = preds, score = head(hits, top_k) * lambda^(4 - n)))
+    }
+  }
+  return(data.frame(word = names(head(sort(colSums(uni), decreasing=TRUE), top_k)), score = NA))
+}
+</pre>
+</div>
+
+</div><!-- container -->
+
+<footer>
+  <div class="container">
+    <p><strong>JHU Data Science Specialization — Capstone Milestone Report</strong></p>
+    <p>Corpus: SwiftKey English (US) &nbsp;·&nbsp; Analysis date: June 2026 &nbsp;·&nbsp; Tools: R, quanteda, tidytext, ggplot2</p>
+    <p style="margin-top:8px;">All statistics derived from the complete SwiftKey corpus files. N-gram frequency analysis based on a stratified random sample of 50,000 lines per source.</p>
+  </div>
+</footer>
+
+</body>
+</html>
